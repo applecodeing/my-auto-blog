@@ -3,14 +3,14 @@ import smtplib
 import feedparser
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import google.generativeai as genai
+from google import genai
 
-# 1. Gemini API 키 설정
+# 1. Gemini API 키 설정 및 클라이언트 생성
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY가 GitHub Secrets에 설정되지 않았습니다.")
 
-genai.configure(api_key=GEMINI_API_KEY)
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 # 2. 구글 트렌드 RSS 키워드 추출
 def get_trending_keyword():
@@ -25,9 +25,6 @@ def get_trending_keyword():
 
 # 3. Gemini 글 작성
 def generate_seo_article(keyword):
-    # 현재 정상 작동하는 gemini-1.5-flash 모델로 변경
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    
     prompt = f"""
     너는 구글 애드센스 수익을 극대화하는 전문 블로그 에디터야.
     오늘의 키워드는 '{keyword}'이다. 이 키워드와 연관된 IT/앱/스마트폰/생활 꿀팁 주제로 블로그 글을 작성해줘.
@@ -38,7 +35,12 @@ def generate_seo_article(keyword):
     3. 분량: 공백 포함 1,500자 이상 작성할 것.
     4. 출력 형식: 첫 줄에는 [제목]만 쓰고, 둘째 줄부터는 HTML 본문 코드로만 작성할 것.
     """
-    response = model.generate_content(prompt)
+    
+    # 지원 가능한 모델 지정 (예: gemini-2.5-flash 대신 gemini-1.5-flash)
+    response = client.models.generate_content(
+        model='gemini-1.5-flash',
+        contents=prompt,
+    )
     text = response.text.strip()
     
     lines = text.split('\n')
