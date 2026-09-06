@@ -25,7 +25,7 @@ def get_trending_keyword():
 
 # 3. Gemini 글 작성
 def generate_seo_article(keyword):
-    # 가장 안정적으로 동작하는 1.5-flash 모델 적용
+    # 현재 정상 작동하는 gemini-1.5-flash 모델로 변경
     model = genai.GenerativeModel('gemini-1.5-flash')
     
     prompt = f"""
@@ -67,11 +67,7 @@ def send_to_blogger(title, body_html):
     print("성공적으로 게시되었습니다.")
 
 if __name__ == "__main__":
-    try:
-        keyword = get_trending_keyword()
-        print(f"추출된 키워드: {keyword}")
-        title, body = generate_seo_article(keyword)
-        send_to_blogger(title, body)
-    except Exception as e:
-        print(f"실행 중 오류가 발생했습니다: {e}")
-        raise e
+    keyword = get_trending_keyword()
+    print(f"추출된 키워드: {keyword}")
+    title, body = generate_seo_article(keyword)
+    send_to_blogger(title, body)
