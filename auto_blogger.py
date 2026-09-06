@@ -10,15 +10,44 @@ APP_NAME = "AutoBloggerPro"  # Unsplash 어트리뷰션용 앱 명칭
 # 1. 실시간 트렌드 키워드 수집 (구글 트렌드 RSS)
 def get_trending_keyword():
     url = "https://trends.google.co.kr/trends/trendingsearches/daily/rss?geo=KR"
-    res = requests.get(url)
-    root = ET.fromstring(res.text)
+    
+    # User-Agent 추가 (자동화 요청 차단 방지)
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+    }
+    
+    try:
+        res = requests.get(url, headers=headers, timeout=10)
+        
+        # 응답 상태 확인
+        if res.status_code != 200:
+            print(f"Error: Status code {res.status_code}")
+            return "최신 생활 정보"
+        
+        # 응답이 비어있는지 확인
+        if not res.text or res.text.strip() == "":
+            print("Error: Empty response")
+            return "최신 생활 정보"
+        
+        # XML 파싱
+        root = ET.fromstring(res.text)
+    except requests.exceptions.RequestException as e:
+        print(f"Request Error: {e}")
+        return "최신 생활 정보"
+    except ET.ParseError as e:
+        print(f"XML Parse Error: {e}")
+        print(f"Response: {res.text[:200]}")
+        return "최신 생활 정보"
     
     keywords = [item.find('title').text for item in root.findall('.//item')]
     
     # 기존 블로그 RSS 파싱하여 중복 체크
     blog_rss = "https://smart-tip-2026.blogspot.com/feeds/posts/default?alt=rss"
-    blog_res = requests.get(blog_rss)
-    blog_content = blog_res.text if blog_res.status_code == 200 else ""
+    try:
+        blog_res = requests.get(blog_rss, timeout=10)
+        blog_content = blog_res.text if blog_res.status_code == 200 else ""
+    except:
+        blog_content = ""
 
     for kw in keywords:
         if kw not in blog_content:
