@@ -36,7 +36,7 @@ def generate_seo_article(keyword):
     4. 출력 형식: 첫 줄에는 [제목]만 쓰고, 둘째 줄부터는 HTML 본문 코드로만 작성할 것.
     """
     
-    # 최신 권장 모델로 지정 (로그가 권장한 models/gemini-3.6-flash)
+    # 최신 권장 모델로 지정 (gemini-3.6-flash)
     try:
         response = client.models.generate_content(
             model='models/gemini-3.6-flash',
