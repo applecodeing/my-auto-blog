@@ -36,17 +36,32 @@ def generate_seo_article(keyword):
     4. 출력 형식: 첫 줄에는 [제목]만 쓰고, 둘째 줄부터는 HTML 본문 코드로만 작성할 것.
     """
     
-    # 지원 가능한 모델 지정 (예: gemini-2.5-flash 대신 gemini-1.5-flash)
-    response = client.models.generate_content(
-        model='gemini-1.5-flash',
-        contents=prompt,
-    )
-    text = response.text.strip()
-    
+    # 최신 권장 모델로 지정 (로그가 권장한 models/gemini-3.6-flash)
+    try:
+        response = client.models.generate_content(
+            model='models/gemini-3.6-flash',
+            contents=prompt,
+        )
+    except Exception as e:
+        # 에러를 로깅하고 워크플로 디버깅에 도움되는 정보 출력
+        print(f"Gemini API 호출 실패: {e}")
+        raise
+
+    # 응답 텍스트 처리 (클라이언트 응답 구조에 따라 조정 필요할 수 있음)
+    if hasattr(response, "text") and response.text:
+        text = response.text.strip()
+    else:
+        # 일부 클라이언트는 candidates/content 구조를 사용합니다. 가능한 필드를 확인합니다.
+        try:
+            # 예: response.candidates[0].content
+            text = response.candidates[0].content.strip()
+        except Exception:
+            text = str(response).strip()
+
     lines = text.split('\n')
     title = lines[0].replace('[제목]', '').replace('#', '').strip()
     body = '\n'.join(lines[1:]).strip()
-    
+
     return title, body
 
 # 4. 이메일 발송
