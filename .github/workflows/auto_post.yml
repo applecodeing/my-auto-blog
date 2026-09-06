@@ -1,33 +1,32 @@
-name: Auto Blog Publisher
+name: Auto Blogger Daily Post
 
 on:
   schedule:
-    # 매일 한국 시간 오전 9시 (UTC 00:00) 실행
-    - cron: '0 0 * * *'
-  workflow_dispatch: # 수동 실행 버튼 활성화
+    - cron: '0 23 * * *' # 매일 한국시간 오전 8시 자동 실행 (UTC 23:00)
+  workflow_dispatch:     # Actions 탭에서 [Run workflow] 수동 버튼 생성
 
 jobs:
-  publish:
+  post:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.10'
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
-          pip install feedparser google-genai
+          pip install requests google-api-python-client google-auth-httplib2 google-auth-oauthlib
 
-      - name: Run auto_blogger.py
+      - name: Run Auto Blogger
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          BLOGGER_SECRET_EMAIL: ${{ secrets.BLOGGER_SECRET_EMAIL }}
-          GMAIL_USER: ${{ secrets.GMAIL_USER }}
-          GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
-        run: |
-          python auto_blogger.py
+          BLOGGER_BLOG_ID: ${{ secrets.BLOGGER_BLOG_ID }}
+          UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
+          BLOGGER_CLIENT_ID: ${{ secrets.BLOGGER_CLIENT_ID }}
+          BLOGGER_CLIENT_SECRET: ${{ secrets.BLOGGER_CLIENT_SECRET }}
+          BLOGGER_REFRESH_TOKEN: ${{ secrets.BLOGGER_REFRESH_TOKEN }}
+        run: python auto_blogger.py
