@@ -7,6 +7,9 @@ import google.generativeai as genai
 
 # 1. Gemini API 키 설정
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY가 GitHub Secrets에 설정되지 않았습니다.")
+
 genai.configure(api_key=GEMINI_API_KEY)
 
 # 2. 구글 트렌드 RSS 키워드 추출
@@ -22,7 +25,8 @@ def get_trending_keyword():
 
 # 3. Gemini 글 작성
 def generate_seo_article(keyword):
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    # 가장 안정적으로 동작하는 1.5-flash 모델 적용
+    model = genai.GenerativeModel('gemini-1.5-flash')
     
     prompt = f"""
     너는 구글 애드센스 수익을 극대화하는 전문 블로그 에디터야.
@@ -63,7 +67,11 @@ def send_to_blogger(title, body_html):
     print("성공적으로 게시되었습니다.")
 
 if __name__ == "__main__":
-    keyword = get_trending_keyword()
-    print(f"추출된 키워드: {keyword}")
-    title, body = generate_seo_article(keyword)
-    send_to_blogger(title, body)
+    try:
+        keyword = get_trending_keyword()
+        print(f"추출된 키워드: {keyword}")
+        title, body = generate_seo_article(keyword)
+        send_to_blogger(title, body)
+    except Exception as e:
+        print(f"실행 중 오류가 발생했습니다: {e}")
+        raise e
